@@ -5,7 +5,8 @@ module.exports = async (req, res) => {
         res.setHeader('Allow', 'POST');
         return res.status(405).json({ error: 'Method Not Allowed' });
       }
-  
+      const telegram_id = body.telegram_id ?? null;
+
       const WEBHOOK_URL = process.env.WATBOT_WEBHOOK_URL;
       if (!WEBHOOK_URL) {
         return res.status(500).json({ error: 'WATBOT_WEBHOOK_URL is missing' });
@@ -34,10 +35,12 @@ module.exports = async (req, res) => {
         firstName,
         lastName,
         phone,
+        telegram_id,
         telegram: body.telegram || null,
         source: 'telegram-webapp',
         ts: Date.now(),
       };
+      
   
       const r = await fetch(WEBHOOK_URL, {
         method: 'POST',
