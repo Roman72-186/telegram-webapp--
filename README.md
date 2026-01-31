@@ -1,4 +1,4 @@
-# Telegram Web App WatBot (интеграция с Leadteh)
+# Telegram Web App (интеграция с Leadteh)
 
 Данное веб-приложение представляет собой Telegram Web App, которое интегрировано с системой Leadteh для обработки регистраций пользователей.
 
