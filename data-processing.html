@@ -74,7 +74,13 @@
 
   <script>
     function goBack() {
-      window.history.back();
+      // Если в контексте Telegram Web App, закрываем веб-приложение
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.close();
+      } else {
+        // Если не в Telegram Web App, возвращаемся назад в истории браузера
+        window.history.back();
+      }
     }
 
     // Telegram init
