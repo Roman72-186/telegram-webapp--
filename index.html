@@ -395,25 +395,27 @@
       const initData = tg ? (tg.initData || '') : '';
       const initDataUnsafe = tg ? (tg.initDataUnsafe || {}) : {};
 
+      // В режиме разработки можно использовать тестовые данные
       const telegram_id =
-        initDataUnsafe.user && typeof initDataUnsafe.user.id === 'number'
+        tg && initDataUnsafe.user && typeof initDataUnsafe.user.id === 'number'
           ? initDataUnsafe.user.id
-          : null;
+          : (window.DEV_TELEGRAM_ID || null); // Для тестирования без Telegram
 
-          const payload = {
-            firstName: (firstNameInput.value || '').trim(),
-            lastName: (lastNameInput.value || '').trim(),
-            phone: phoneE164,
-            telegram_id,
-            telegram: {
-              initData,
-              user: initDataUnsafe.user || null
-            }
-          };
-          if (window.Telegram && window.Telegram.WebApp) {
-            Telegram.WebApp.ready();
-            Telegram.WebApp.expand();
-          }
+      const payload = {
+        firstName: (firstNameInput.value || '').trim(),
+        lastName: (lastNameInput.value || '').trim(),
+        phone: phoneE164,
+        telegram_id,
+        telegram: {
+          initData,
+          user: initDataUnsafe.user || null
+        }
+      };
+
+      if (window.Telegram && window.Telegram.WebApp) {
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+      }
           
       submitBtn.disabled = true;
       loadingIndicator.classList.remove('hidden');

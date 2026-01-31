@@ -6,10 +6,8 @@ module.exports = async (req, res) => {
       return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const WEBHOOK_URL = process.env.WATBOT_WEBHOOK_URL;
-    if (!WEBHOOK_URL) {
-      return res.status(500).json({ error: 'WATBOT_WEBHOOK_URL is missing' });
-    }
+    // Используем вебхук Leadteh напрямую
+    const WEBHOOK_URL = 'https://rb786743.leadteh.ru/inner_webhook/485f8213-edeb-43db-8fc2-febd8715f7a7';
 
     let body = req.body;
     if (typeof body === 'string') {
@@ -32,20 +30,37 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Invalid phone format. Expected +7XXXXXXXXXX' });
     }
 
-    const payloadToWatbot = {
-      firstName,
-      lastName,
-      phone,
-      telegram_id,
-      telegram: body.telegram || null,
-      source: 'telegram-webapp',
-      ts: Date.now(),
+    // Подготовка данных в формате, требуемом LEADTEX
+    const payloadToLeadteh = {
+      contact_by: 'telegram_id',
+      search: String(telegram_id),
+      variables: {
+        // Основная информация о пользователе
+        customer_name: `${firstName} ${lastName}`,
+        customer_phone: phone,
+
+        // Информация из Telegram
+        telegram_user_name: firstName + ' ' + lastName,
+        telegram_id: telegram_id,
+
+        // Дополнительная информация
+        source: 'telegram-webapp-registration',
+        ts: new Date().toISOString(),
+
+        // Поля, которые могут использоваться в сценариях LEADTEX
+        first_name: firstName,
+        last_name: lastName,
+
+        // Поля для возможного расширения функционала
+        registration_date: new Date().toISOString().split('T')[0],
+        registration_source: 'telegram_mini_app'
+      }
     };
 
     const r = await fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payloadToWatbot),
+      body: JSON.stringify(payloadToLeadteh),
     });
 
     const text = await r.text().catch(() => '');
@@ -54,13 +69,13 @@ module.exports = async (req, res) => {
 
     if (!r.ok) {
       return res.status(502).json({
-        error: 'Watbot webhook error',
+        error: 'Leadteh webhook error',
         status: r.status,
         body: json || text || null,
       });
     }
 
-    return res.status(200).json({ ok: true, watbot: json || null });
+    return res.status(200).json({ ok: true, leadteh: json || null });
   } catch (e) {
     return res.status(500).json({
       error: 'Unhandled server error',
