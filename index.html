@@ -169,7 +169,7 @@
           <div class="checkbox-wrapper">
             <input type="checkbox" id="agreement1" name="agreement1" class="flex-shrink-0" />
             <label for="agreement1" class="text-sm text-gray-700">
-              Я согласен с <a href="#offer">Офертой</a>
+              Я согласен с <a href="offer.html" target="_blank">Офертой</a>
             </label>
           </div>
           <div id="agreement1Error" class="error-message ml-7"></div>
@@ -177,7 +177,7 @@
           <div class="checkbox-wrapper">
             <input type="checkbox" id="agreement2" name="agreement2" class="flex-shrink-0" />
             <label for="agreement2" class="text-sm text-gray-700">
-              Я согласен с <a href="#privacy">Политикой конфиденциальности</a>
+              Я согласен с <a href="privacy.html" target="_blank">Политикой конфиденциальности</a>
             </label>
           </div>
           <div id="agreement2Error" class="error-message ml-7"></div>
@@ -185,7 +185,7 @@
           <div class="checkbox-wrapper">
             <input type="checkbox" id="agreement3" name="agreement3" class="flex-shrink-0" />
             <label for="agreement3" class="text-sm text-gray-700">
-              Я согласен с <a href="#data-processing">Обработкой персональных данных</a>
+              Я согласен с <a href="data-processing.html" target="_blank">Обработкой персональных данных</a>
             </label>
           </div>
           <div id="agreement3Error" class="error-message ml-7"></div>
@@ -221,45 +221,8 @@
 
   <!-- Footer -->
   <footer id="footer" class="bg-gray-50 border-t border-gray-200 mt-auto">
-    <div class="max-w-4xl mx-auto px-4 py-12">
-      <div class="grid md:grid-cols-3 gap-8">
-        <div id="offer" class="scroll-mt-20">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Оферта</h3>
-          <div class="text-sm text-gray-600 space-y-2">
-            <p>Настоящая публичная оферта (далее — «Оферта») определяет условия использования сервиса.</p>
-            <p>Используя наш сервис, вы соглашаетесь с условиями данной оферты.</p>
-            <p>Мы оставляем за собой право изменять условия оферты в любое время без предварительного уведомления.</p>
-            <p>Все изменения вступают в силу с момента публикации на данной странице.</p>
-            <p>При возникновении споров стороны обязуются решать их путем переговоров.</p>
-          </div>
-        </div>
-
-        <div id="privacy" class="scroll-mt-20">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Политика конфиденциальности</h3>
-          <div class="text-sm text-gray-600 space-y-2">
-            <p>Мы обязуемся защищать вашу конфиденциальность и персональные данные.</p>
-            <p>Мы собираем только ту информацию, которая необходима для предоставления наших услуг.</p>
-            <p>Ваши данные не передаются третьим лицам без вашего согласия, за исключением случаев, предусмотренных законодательством.</p>
-            <p>Мы используем современные технологии для защиты ваших данных от несанкционированного доступа.</p>
-            <p>Вы имеете право запросить информацию о ваших персональных данных и потребовать их удаления.</p>
-          </div>
-        </div>
-
-        <div id="data-processing" class="scroll-mt-20">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Обработка персональных данных</h3>
-          <div class="text-sm text-gray-600 space-y-2">
-            <p>Обработка персональных данных осуществляется в соответствии с законодательством РФ.</p>
-            <p>Цель обработки: предоставление услуг сервиса, улучшение качества обслуживания.</p>
-            <p>Мы обрабатываем следующие данные: имя, фамилия, номер телефона.</p>
-            <p>Срок хранения данных: до момента отзыва согласия на обработку.</p>
-            <p>Вы можете отозвать согласие на обработку данных в любое время, отправив запрос на наш email.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-500">
-        <p>&copy; 2025 Все права защищены</p>
-      </div>
+    <div class="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-gray-500">
+      <p>&copy; 2025 Все права защищены</p>
     </div>
   </footer>
 
@@ -444,14 +407,6 @@
       }
     });
 
-    // Smooth scroll
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        const target = document.querySelector(a.getAttribute('href'));
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    });
 
     // Telegram init
     if (window.Telegram && window.Telegram.WebApp) {
