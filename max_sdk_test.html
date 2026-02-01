@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAX SDK Test</title>
+    <script src="https://st.max.ru/js/max-web-app.js"></script>
+</head>
+<body>
+    <h1>MAX SDK Test</h1>
+    <script>
+        window.onload = function() {
+            if (typeof WebApp !== 'undefined') {
+                WebApp.ready();
+                console.log('WebApp is ready');
+
+                // Test storage methods
+                WebApp.Storage.setItem('test_key', 'test_value');
+                console.log('WebApp.Storage.setItem called');
+
+                WebApp.Storage.getItem('test_key').then(function(value) {
+                    console.log('WebApp.Storage.getItem result:', value);
+                });
+
+                // Test other methods
+                if (WebApp.getUserData) {
+                    WebApp.getUserData().then(function(user) {
+                        console.log('WebApp.getUserData result:', user);
+                    });
+                }
+
+                if (WebApp.BackButton) {
+                    WebApp.BackButton.show();
+                    WebApp.BackButton.onClick(function() {
+                        WebApp.close();
+                    });
+                    console.log('WebApp.BackButton configured');
+                }
+
+                if (WebApp.MainButton) {
+                    WebApp.MainButton.show({
+                        text: 'Test Button',
+                        color: '#3390ec',
+                        text_color: '#ffffff'
+                    });
+                    WebApp.MainButton.onClick(function() {
+                        alert('MainButton clicked');
+                    });
+                    console.log('WebApp.MainButton configured');
+                }
+
+            } else {
+                console.error('WebApp is not defined');
+            }
+        };
+    </script>
+</body>
+</html>
