@@ -6,8 +6,8 @@ module.exports = async (req, res) => {
       return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    // Используем вебхук Leadteh напрямую
-    const WEBHOOK_URL = 'https://rb786743.leadteh.ru/inner_webhook/485f8213-edeb-43db-8fc2-febd8715f7a7';
+    // Используем новый вебхук WatBot
+    const WEBHOOK_URL = 'https://api.watbot.ru/hook/4325587:oAbD2q949K3SGmOKvZXF2gjtO4d1LHrTnHNWX4T2h8dB6DO8';
 
     let body = req.body;
     if (typeof body === 'string') {
@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Invalid JSON body' });
     }
 
-    const telegram_id = body.telegram_id ?? null;
+    const telegram_id = body.telegram_id || null;
 
     const firstName = String(body.firstName || '').trim();
     const lastName  = String(body.lastName  || '').trim();
@@ -30,10 +30,10 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Invalid phone format. Expected +7XXXXXXXXXX' });
     }
 
-    // Подготовка данных в формате, требуемом LEADTEX
-    const payloadToLeadteh = {
-      contact_by: 'telegram_id',
-      search: String(telegram_id),
+    // Подготовка данных в формате, требуемом WatBot
+    const payloadToWatBot = {
+      contact_by: 'phone',
+      search: phone,
       variables: {
         // Основная информация о пользователе
         customer_name: `${firstName} ${lastName}`,
@@ -60,7 +60,7 @@ module.exports = async (req, res) => {
     const r = await fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payloadToLeadteh),
+      body: JSON.stringify(payloadToWatBot),
     });
 
     const text = await r.text().catch(() => '');
@@ -69,13 +69,13 @@ module.exports = async (req, res) => {
 
     if (!r.ok) {
       return res.status(502).json({
-        error: 'Leadteh webhook error',
+        error: 'WatBot webhook error',
         status: r.status,
         body: json || text || null,
       });
     }
 
-    return res.status(200).json({ ok: true, leadteh: json || null });
+    return res.status(200).json({ ok: true, watbot: json || null });
   } catch (e) {
     return res.status(500).json({
       error: 'Unhandled server error',
