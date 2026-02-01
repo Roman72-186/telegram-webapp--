@@ -42,8 +42,8 @@ fetch(CONFIG.WEBHOOK_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-        contact_by: 'phone',           // ← Искать по номеру телефона
-        search: '+79991234567',        // ← Номер телефона клиента
+        contact_by: telegram_id ? 'telegram_id' : 'phone',  // ← Искать по telegram_id если доступен, иначе по телефону
+        search: telegram_id ? String(telegram_id) : phone,   // ← telegram_id или номер телефона клиента
         variables: {
             order_id: 'ORD-1706620800000',
             customer_name: 'Иван Петров',
@@ -179,8 +179,8 @@ fetch(CONFIG.WEBHOOK_URL, {
 
 ```json
 {
-  "contact_by": "phone",
-  "search": "+79991234567",
+  "contact_by": "telegram_id",
+  "search": "123456789",
   "variables": {
     "order_id": "ORD-1706620800000",
     "order_total": "1980",
@@ -201,7 +201,8 @@ fetch(CONFIG.WEBHOOK_URL, {
     "order_comment": "Позвонить перед доставкой",
 
     "source": "mini_app_keychain_shop",
-    "telegram_user_name": "Иван Петров"
+    "telegram_user_name": "Иван Петров",
+    "telegram_id": "123456789"
   }
 }
 ```

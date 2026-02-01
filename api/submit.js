@@ -31,26 +31,27 @@ module.exports = async (req, res) => {
     }
 
     // Подготовка данных в формате, требуемом WatBot
+    // Используем telegram_id как основной параметр поиска, если доступен
     const payloadToWatBot = {
-      contact_by: 'phone',
-      search: phone,
+      contact_by: telegram_id ? 'telegram_id' : 'phone',
+      search: telegram_id ? String(telegram_id) : phone,
       variables: {
         // Основная информация о пользователе
         customer_name: `${firstName} ${lastName}`,
         customer_phone: phone,
-
+        
         // Информация из Telegram
         telegram_user_name: firstName + ' ' + lastName,
         telegram_id: telegram_id,
-
+        
         // Дополнительная информация
         source: 'telegram-webapp-registration',
         ts: new Date().toISOString(),
-
-        // Поля, которые могут использоваться в сценариях LEADTEX
+        
+        // Поля, которые могут использоваться в сценариях WatBot
         first_name: firstName,
         last_name: lastName,
-
+        
         // Поля для возможного расширения функционала
         registration_date: new Date().toISOString().split('T')[0],
         registration_source: 'telegram_mini_app'
