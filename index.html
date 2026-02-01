@@ -5,58 +5,58 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 
-  <!-- Telegram Meta Tags -->
-  <meta name="telegram-web-app" content="true" />
+  <!-- MAX Mini App Meta Tags -->
   <meta name="theme-color" content="#3390ec" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
-  <title>Telegram Web App</title>
+  <title>MAX Mini App - Регистрация</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- IMask -->
   <script src="https://cdn.jsdelivr.net/npm/imask@7.1.3/dist/imask.min.js"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+  <!-- MAX Bridge SDK -->
+  <script src="https://apps.max.ru/static/bridge.js"></script>
 
   <style>
     :root{
-      --tg-theme-bg-color:#ffffff;
-      --tg-theme-text-color:#000000;
-      --tg-theme-hint-color:#999999;
-      --tg-theme-link-color:#3390ec;
-      --tg-theme-button-color:#3390ec;
-      --tg-theme-button-text-color:#ffffff;
-      --tg-theme-secondary-bg-color:#f1f1f1;
+      --max-theme-bg-color:#ffffff;
+      --max-theme-text-color:#000000;
+      --max-theme-hint-color:#999999;
+      --max-theme-link-color:#3390ec;
+      --max-theme-button-color:#3390ec;
+      --max-theme-button-text-color:#ffffff;
+      --max-theme-secondary-bg-color:#f1f1f1;
     }
     body{
       font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-      background:var(--tg-theme-bg-color);
-      color:var(--tg-theme-text-color);
+      background:var(--max-theme-bg-color);
+      color:var(--max-theme-text-color);
     }
-    .tg-button{
-      background:var(--tg-theme-button-color);
-      color:var(--tg-theme-button-text-color);
+    .max-button{
+      background:var(--max-theme-button-color);
+      color:var(--max-theme-button-text-color);
       cursor:pointer;
       pointer-events:auto;
     }
-    .tg-button:hover{ opacity:.9; }
-    .tg-button:disabled{
+    .max-button:hover{ opacity:.9; }
+    .max-button:disabled{
       opacity:.5;
       cursor:not-allowed;
     }
-    .tg-input{
+    .max-input{
       border:1px solid #e0e0e0;
       transition:all .2s;
     }
-    .tg-input:focus{
-      border-color:var(--tg-theme-button-color);
+    .max-input:focus{
+      border-color:var(--max-theme-button-color);
       outline:none;
       box-shadow:0 0 0 3px rgba(51,144,236,.1);
     }
-    .tg-input.error{ border-color:#ff3333; }
+    .max-input.error{ border-color:#ff3333; }
     .error-message{
       color:#ff3333;
       font-size:.875rem;
@@ -77,11 +77,11 @@
       height:1.25rem;
       margin-top:.125rem;
       cursor:pointer;
-      accent-color:var(--tg-theme-button-color);
+      accent-color:var(--max-theme-button-color);
     }
     .checkbox-wrapper label{ cursor:pointer; line-height:1.5; }
     .checkbox-wrapper a{
-      color:var(--tg-theme-link-color);
+      color:var(--max-theme-link-color);
       text-decoration:underline;
     }
     .checkbox-wrapper a:hover{ opacity:.8; }
@@ -124,7 +124,7 @@
             type="text"
             id="firstName"
             name="firstName"
-            class="tg-input w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-400"
+            class="max-input w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-400"
             placeholder="Введите ваше имя"
             autocomplete="given-name"
           />
@@ -140,7 +140,7 @@
             type="text"
             id="lastName"
             name="lastName"
-            class="tg-input w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-400"
+            class="max-input w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-400"
             placeholder="Введите вашу фамилию"
             autocomplete="family-name"
           />
@@ -156,7 +156,7 @@
             type="tel"
             id="phone"
             name="phone"
-            class="tg-input w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-400"
+            class="max-input w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-400"
             placeholder="+7 (999) 999-99-99"
             autocomplete="tel"
             inputmode="tel"
@@ -195,7 +195,7 @@
         <button
           type="submit"
           id="submitBtn"
-          class="tg-button w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-200 shadow-md hover:shadow-lg"
+          class="max-button w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-200 shadow-md hover:shadow-lg"
         >
           Отправить
         </button>
@@ -227,6 +227,10 @@
   </footer>
 
   <script>
+    // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+    let userData = null;
+    let isMaxApp = false;
+
     // ===== DOM =====
     const form = document.getElementById('form');
     const registrationForm = document.getElementById('registrationForm');
@@ -256,6 +260,79 @@
       mask: '+{7} (000) 000-00-00',
       lazy: false
     });
+
+    // ===== MAX BRIDGE ИНИЦИАЛИЗАЦИЯ =====
+    async function initMaxBridge() {
+      console.log('[INIT] Начало инициализации MAX Bridge');
+
+      if (!window.MaxBridge) {
+        console.warn('[INIT] MaxBridge недоступен - работаем в режиме браузера');
+        isMaxApp = false;
+        initBrowserMode();
+        return;
+      }
+
+      try {
+        await MaxBridge.ready();
+        console.log('[INIT] MaxBridge готов!');
+
+        isMaxApp = true;
+
+        await MaxBridge.send('WebApp.ready');
+        console.log('[INIT] WebApp.ready отправлен');
+
+        await getUserData();
+
+        console.log('[INIT] Инициализация завершена');
+
+      } catch (error) {
+        console.error('[INIT] Ошибка инициализации:', error);
+        isMaxApp = false;
+        initBrowserMode();
+      }
+    }
+
+    // ===== ПОЛУЧЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ =====
+    async function getUserData() {
+      try {
+        userData = await MaxBridge.send('getUserData');
+        console.log('[USER] Данные пользователя получены:', userData);
+
+        // Автозаполнение имени если поля пустые
+        if (userData) {
+          if (userData.first_name && !firstNameInput.value) {
+            firstNameInput.value = userData.first_name;
+          }
+          if (userData.last_name && !lastNameInput.value) {
+            lastNameInput.value = userData.last_name;
+          }
+        }
+
+      } catch (error) {
+        console.error('[USER] Ошибка получения данных пользователя:', error);
+      }
+    }
+
+    // ===== РЕЖИМ БРАУЗЕРА (FALLBACK) =====
+    function initBrowserMode() {
+      console.log('[BROWSER] Инициализация режима браузера');
+
+      userData = {
+        user_id: window.DEV_USER_ID || null,
+        name: 'Тестовый пользователь'
+      };
+    }
+
+    // ===== ЗАКРЫТИЕ ПРИЛОЖЕНИЯ =====
+    async function closeApp() {
+      if (isMaxApp) {
+        try {
+          await MaxBridge.send('WebApp.close');
+        } catch (error) {
+          console.error('[CLOSE] Ошибка закрытия:', error);
+        }
+      }
+    }
 
     // ===== Helpers =====
     function showFatal(message) {
@@ -293,9 +370,7 @@
     }
 
     function validatePhone() {
-      // Для маски +{7} (...) unmaskedValue содержит цифры вместе с 7 (обычно 11)
       const digits = (phoneMask.unmaskedValue || '').replace(/\D/g,'');
-      // Приводим к +7XXXXXXXXXX (10 цифр после 7)
       const isOk = /^7\d{10}$/.test(digits);
       if (!isOk) { showError(phoneInput, phoneError, 'Введите корректный номер телефона'); return false; }
       hideError(phoneInput, phoneError);
@@ -318,9 +393,9 @@
     }
 
     function buildPhoneE164() {
-      const digits = (phoneMask.unmaskedValue || '').replace(/\D/g,''); // 7XXXXXXXXXX
+      const digits = (phoneMask.unmaskedValue || '').replace(/\D/g,'');
       if (!/^7\d{10}$/.test(digits)) return null;
-      return `+${digits}`; // +7XXXXXXXXXX
+      return `+${digits}`;
     }
 
     // ===== Real-time validation =====
@@ -337,7 +412,6 @@
       e.preventDefault();
       hideFatal();
 
-      // Валидация (одним проходом)
       const ok =
         (validateFirstName() ? 1 : 0) &
         (validateLastName()  ? 1 : 0) &
@@ -352,34 +426,20 @@
         return;
       }
 
-      // Telegram context (если открыто из Telegram)
-      const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-
-      const initData = tg ? (tg.initData || '') : '';
-      const initDataUnsafe = tg ? (tg.initDataUnsafe || {}) : {};
-
-      // В режиме разработки можно использовать тестовые данные
-      const telegram_id =
-        tg && initDataUnsafe.user && typeof initDataUnsafe.user.id === 'number'
-          ? initDataUnsafe.user.id
-          : (window.DEV_TELEGRAM_ID || null); // Для тестирования без Telegram
+      // Формируем user_id из MAX данных
+      const max_user_id = userData && userData.user_id ? userData.user_id : null;
 
       const payload = {
         firstName: (firstNameInput.value || '').trim(),
         lastName: (lastNameInput.value || '').trim(),
         phone: phoneE164,
-        telegram_id,
+        telegram_id: max_user_id, // Используем user_id из MAX (совместимость с API)
         telegram: {
-          initData,
-          user: initDataUnsafe.user || null
+          initData: '',
+          user: userData || null
         }
       };
 
-      if (window.Telegram && window.Telegram.WebApp) {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
-      }
-          
       submitBtn.disabled = true;
       loadingIndicator.classList.remove('hidden');
 
@@ -398,7 +458,11 @@
         registrationForm.classList.add('hidden');
         successMessage.classList.add('show');
 
-        if (tg) { try { tg.close(); } catch (_) {} }
+        // Закрываем приложение через 2 секунды после успеха
+        setTimeout(async () => {
+          await closeApp();
+        }, 2000);
+
       } catch (err) {
         showFatal(`Произошла ошибка при отправке данных: ${err && err.message ? err.message : 'неизвестная ошибка'}`);
       } finally {
@@ -407,20 +471,21 @@
       }
     });
 
+    // ===== ЗАПУСК ПРИЛОЖЕНИЯ =====
+    window.addEventListener('DOMContentLoaded', async () => {
+      console.log('[APP] Страница загружена, начинаем инициализацию');
+      await initMaxBridge();
+      console.log('[APP] Приложение готово к работе');
+    });
 
-    // Telegram init
-    if (window.Telegram && window.Telegram.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.ready();
-      tg.expand();
+    // ===== ОБРАБОТКА ОШИБОК =====
+    window.addEventListener('error', (event) => {
+      console.error('[ERROR] Глобальная ошибка:', event.error);
+    });
 
-      if (tg.themeParams) {
-        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
-        document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
-        document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#3390ec');
-        document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
-      }
-    }
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error('[ERROR] Необработанный Promise:', event.reason);
+    });
   </script>
 </body>
 </html>

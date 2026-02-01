@@ -4,41 +4,42 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 
-  <!-- Telegram Meta Tags -->
-  <meta name="telegram-web-app" content="true" />
+  <!-- MAX Mini App Meta Tags -->
   <meta name="theme-color" content="#3390ec" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
-  <title>Обработка персональных данных - Telegram Web App</title>
+  <title>Обработка персональных данных - MAX Mini App</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- MAX Bridge SDK -->
+  <script src="https://apps.max.ru/static/bridge.js"></script>
 
   <style>
     :root{
-      --tg-theme-bg-color:#ffffff;
-      --tg-theme-text-color:#000000;
-      --tg-theme-hint-color:#999999;
-      --tg-theme-link-color:#3390ec;
-      --tg-theme-button-color:#3390ec;
-      --tg-theme-button-text-color:#ffffff;
-      --tg-theme-secondary-bg-color:#f1f1f1;
+      --max-theme-bg-color:#ffffff;
+      --max-theme-text-color:#000000;
+      --max-theme-hint-color:#999999;
+      --max-theme-link-color:#3390ec;
+      --max-theme-button-color:#3390ec;
+      --max-theme-button-text-color:#ffffff;
+      --max-theme-secondary-bg-color:#f1f1f1;
     }
     body{
       font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-      background:var(--tg-theme-bg-color);
-      color:var(--tg-theme-text-color);
+      background:var(--max-theme-bg-color);
+      color:var(--max-theme-text-color);
     }
-    .tg-button{
-      background:var(--tg-theme-button-color);
-      color:var(--tg-theme-button-text-color);
+    .max-button{
+      background:var(--max-theme-button-color);
+      color:var(--max-theme-button-text-color);
       cursor:pointer;
       pointer-events:auto;
     }
-    .tg-button:hover{ opacity:.9; }
-    .tg-button:disabled{
+    .max-button:hover{ opacity:.9; }
+    .max-button:disabled{
       opacity:.5;
       cursor:not-allowed;
     }
@@ -49,17 +50,16 @@
       z-index: 1000;
     }
     .document-content {
+      padding-top: 20px;
+    }
+    .document-content.with-back-button {
       padding-top: 60px;
     }
   </style>
 </head>
 
 <body class="min-h-screen flex flex-col">
-  <div class="back-button">
-    <button onclick="goBack()" class="tg-button py-2 px-4 rounded-lg font-semibold">← Назад</button>
-  </div>
-
-  <main class="flex-1 max-w-2xl mx-auto w-full px-4 py-8 document-content">
+  <main id="mainContent" class="flex-1 max-w-2xl mx-auto w-full px-4 py-8 document-content">
     <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
       <h1 class="text-2xl font-bold text-gray-900 mb-6">Обработка персональных данных</h1>
       <div class="text-sm text-gray-600 space-y-2">
@@ -73,24 +73,93 @@
   </main>
 
   <script>
+    // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+    let isMaxApp = false;
+
+    // ===== ФУНКЦИЯ ВОЗВРАТА =====
     function goBack() {
-      // Возвращаемся назад в истории браузера, чтобы вернуться к форме
-      window.history.back();
-    }
-
-    // Telegram init
-    if (window.Telegram && window.Telegram.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.ready();
-      tg.expand();
-
-      if (tg.themeParams) {
-        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
-        document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
-        document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#3390ec');
-        document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = 'index.html';
       }
     }
+
+    // ===== MAX BRIDGE ИНИЦИАЛИЗАЦИЯ =====
+    async function initMaxBridge() {
+      console.log('[INIT] Начало инициализации MAX Bridge');
+
+      if (!window.MaxBridge) {
+        console.warn('[INIT] MaxBridge недоступен - работаем в режиме браузера');
+        isMaxApp = false;
+        initBrowserMode();
+        return;
+      }
+
+      try {
+        await MaxBridge.ready();
+        console.log('[INIT] MaxBridge готов!');
+
+        isMaxApp = true;
+
+        await MaxBridge.send('WebApp.ready');
+        console.log('[INIT] WebApp.ready отправлен');
+
+        await setupBackButton();
+
+        console.log('[INIT] Инициализация завершена');
+
+      } catch (error) {
+        console.error('[INIT] Ошибка инициализации:', error);
+        isMaxApp = false;
+        initBrowserMode();
+      }
+    }
+
+    // ===== НАСТРОЙКА КНОПКИ "НАЗАД" =====
+    async function setupBackButton() {
+      try {
+        await MaxBridge.send('BackButton.show');
+        console.log('[BACK] Кнопка "Назад" показана');
+
+        MaxBridge.on('BackButton.clicked', () => {
+          console.log('[BACK] Кнопка "Назад" нажата');
+          goBack();
+        });
+
+      } catch (error) {
+        console.error('[BACK] Ошибка настройки кнопки "Назад":', error);
+      }
+    }
+
+    // ===== РЕЖИМ БРАУЗЕРА (FALLBACK) =====
+    function initBrowserMode() {
+      console.log('[BROWSER] Инициализация режима браузера');
+
+      const backButtonHtml = `
+        <div class="back-button">
+          <button onclick="goBack()" class="max-button py-2 px-4 rounded-lg font-semibold">← Назад</button>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('afterbegin', backButtonHtml);
+
+      document.getElementById('mainContent').classList.add('with-back-button');
+    }
+
+    // ===== ЗАПУСК =====
+    window.addEventListener('DOMContentLoaded', async () => {
+      console.log('[APP] Страница загружена');
+      await initMaxBridge();
+    });
+
+    // ===== ОБРАБОТКА ОШИБОК =====
+    window.addEventListener('error', (event) => {
+      console.error('[ERROR] Глобальная ошибка:', event.error);
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error('[ERROR] Необработанный Promise:', event.reason);
+    });
   </script>
 </body>
 </html>
