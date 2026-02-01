@@ -69,3 +69,7 @@
 
 - [GitHub](https://github.com/Roman72-186/telegram-webapp)
 - [Vercel](https://telegram-webapp.vercel.app)
+- [Документация MAX Mini App](MAX_MINI_APP_DOCUMENTATION.md)
+
+- [GitHub](https://github.com/Roman72-186/telegram-webapp)
+- [Vercel](https://telegram-webapp.vercel.app)
