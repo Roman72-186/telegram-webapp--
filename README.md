@@ -36,12 +36,10 @@
   "variables": {
     "customer_name": "Имя Фамилия",
     "customer_phone": "+7XXXXXXXXXX",
-    "telegram_user_name": "Имя Фамилия",
     "telegram_id": "telegram_id_пользователя",
+    "max_user_data": "{\"id\":123456789,\"first_name\":\"Имя\",\"last_name\":\"Фамилия\",\"username\":\"username\",\"language_code\":\"ru\"}", // JSON-строка с данными пользователя из MAX
     "source": "telegram-webapp-registration",
     "ts": "timestamp",
-    "first_name": "Имя",
-    "last_name": "Фамилия",
     "registration_date": "YYYY-MM-DD",
     "registration_source": "telegram_mini_app"
   }

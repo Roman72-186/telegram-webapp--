@@ -47,6 +47,7 @@ fetch(CONFIG.WEBHOOK_URL, {
         variables: {
             order_id: 'ORD-1706620800000',
             customer_name: 'Иван Петров',
+            max_user_data: '{"id":123456789,"first_name":"Иван","last_name":"Петров","username":"ivanpetrov","language_code":"ru"}', // JSON-строка с данными пользователя из MAX
             // ... остальные переменные
         }
     })
@@ -152,7 +153,6 @@ fetch(CONFIG.WEBHOOK_URL, {
 3. Только после этого Mini App сможет найти контакт по ID
 
 ---
-
 ## 6. Доступные переменные в WatBot
 
 После получения webhook, в карточке контакта будут доступны:
@@ -172,9 +172,11 @@ fetch(CONFIG.WEBHOOK_URL, {
 | `{{delivery_address}}` | ул. Пушкина, д. 10 |
 | `{{order_comment}}` | Комментарий |
 | `{{telegram_user_name}}` | Иван Петров |
+| `{{telegram_id}}` | 123456789 |
+| `{{max_user_data}}` | JSON-строка с данными пользователя из MAX |
+
 
 ---
-
 ## 7. Пример полного JSON запроса
 
 ```json
@@ -202,10 +204,12 @@ fetch(CONFIG.WEBHOOK_URL, {
 
     "source": "mini_app_keychain_shop",
     "telegram_user_name": "Иван Петров",
-    "telegram_id": "123456789"
+    "telegram_id": "123456789",
+    "max_user_data": "{\"id\":123456789,\"first_name\":\"Иван\",\"last_name\":\"Петров\",\"username\":\"ivanpetrov\",\"language_code\":\"ru\"}" // JSON-строка с данными пользователя из MAX
   }
 }
 ```
+
 
 ---
 

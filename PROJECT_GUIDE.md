@@ -119,6 +119,12 @@ const payloadToWatBot = {
     // Добавьте или измените переменные по необходимости
     customer_name: `${firstName} ${lastName}`,
     customer_phone: phone,
+    telegram_id: telegram_id,
+    max_user_data: JSON.stringify(userData), // JSON-строка с данными пользователя из MAX
+    source: 'telegram-webapp-registration',
+    ts: new Date().toISOString(),
+    registration_date: new Date().toISOString().split('T')[0],
+    registration_source: 'telegram_mini_app'
     // ... другие переменные
   }
 };
@@ -149,10 +155,12 @@ const payloadToWatBot = {
 
 - `{{customer_name}}` - имя и фамилия пользователя
 - `{{customer_phone}}` - номер телефона пользователя
-- `{{telegram_user_name}}` - имя пользователя из Telegram
 - `{{telegram_id}}` - ID пользователя в Telegram
-- `{{first_name}}` - имя пользователя
-- `{{last_name}}` - фамилия пользователя
+- `{{max_user_data}}` - JSON-строка с данными пользователя из MAX
+- `{{source}}` - источник регистрации
+- `{{ts}}` - временная метка
+- `{{registration_date}}` - дата регистрации
+- `{{registration_source}}` - источник регистрации в Mini App
 
 ### Шаг 4: Тестирование интеграции
 
@@ -203,10 +211,12 @@ const payloadToWatBot = {
 3. Проверьте, что переменные были установлены корректно:
    - customer_name
    - customer_phone
-   - telegram_user_name
    - telegram_id
-   - first_name
-   - last_name
+   - max_user_data
+   - source
+   - ts
+   - registration_date
+   - registration_source
    - и другие переменные, указанные в интеграции
 
 1. Войдите в ваш аккаунт WatBot
@@ -214,10 +224,12 @@ const payloadToWatBot = {
 3. Проверьте, что переменные были установлены корректно:
    - customer_name
    - customer_phone
-   - telegram_user_name
    - telegram_id
-   - first_name
-   - last_name
+   - max_user_data
+   - source
+   - ts
+   - registration_date
+   - registration_source
    - и другие переменные, указанные в интеграции
 
 ### Возможные ошибки и решения

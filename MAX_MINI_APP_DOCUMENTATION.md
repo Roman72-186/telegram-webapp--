@@ -288,6 +288,32 @@ if (validateInitData(initData, botToken)) {
 }
 ```
 
+#### Получение данных пользователя из вебхука WatBot
+
+После интеграции с WatBot все данные пользователя из MAX передаются в переменной `max_user_data` в виде JSON-строки. Для получения доступа к этим данным на стороне сервера, необходимо распарсить эту строку:
+
+```javascript
+// Пример получения данных пользователя из вебхука WatBot
+app.post('/webhook/watbot', (req, res) => {
+    const { variables } = req.body;
+    
+    if (variables && variables.max_user_data) {
+        try {
+            // Парсим JSON-строку с данными пользователя
+            const userData = JSON.parse(variables.max_user_data);
+            
+            console.log('ID пользователя:', userData.id);
+            console.log('Имя пользователя:', userData.first_name);
+            console.log('Фамилия пользователя:', userData.last_name);
+            console.log('Язык пользователя:', userData.language_code);
+            // и другие поля...
+        } catch (error) {
+            console.error('Ошибка при парсинге max_user_data:', error);
+        }
+    }
+});
+```
+
 ## Параметры запуска (Deep Link)
 
 При открытии Mini App можно передавать дополнительные параметры через строку запроса URL. Один из наиболее часто используемых параметров - `start` (или `start_param`), который позволяет передавать полезную нагрузку (payload) в приложение при его запуске.
@@ -321,9 +347,30 @@ https://max.ru/<botName>?start=<payload>
 if (WebApp.initDataUnsafe && WebApp.initDataUnsafe.start_param) {
     const startParam = WebApp.initDataUnsafe.start_param;
     console.log('Параметр start:', startParam);
-}
-```
-
+    }
+    ```
+    
+    ## Пример payloadToWatBot
+    
+    Вот как выглядит полный пример объекта `payloadToWatBot`, который отправляется на вебхук WatBot с информацией о пользователе из MAX:
+    
+    ```javascript
+    const payloadToWatBot = {
+      contact_by: 'phone', // или 'telegram_id', если доступен
+      search: '+79123456789', // телефон или telegram_id для поиска
+      variables: {
+        customer_name: 'Иван Петров',
+        customer_phone: '+79123456789',
+        telegram_id: '123456789', // если доступен
+        max_user_data: '{"id":123456789,"first_name":"Иван","last_name":"Петров","username":"ivan_petrov","language_code":"ru"}', // JSON-строка с данными пользователя из MAX
+        source: 'telegram-webapp-registration',
+        ts: '2023-12-01T10:0:00.000Z',
+        registration_date: '2023-12-01',
+        registration_source: 'telegram_mini_app'
+      }
+    };
+    ```
+    
 2. Путем парсинга `window.location.search`:
 ```javascript
 const urlParams = new URLSearchParams(window.location.search);

@@ -17,11 +17,13 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Invalid JSON body' });
     }
 
-    const telegram_id = body.telegram_id || null;
+    // Получаем userData из body.telegram.user
+    const userData = body.telegram?.user || {};
+    const telegram_id = userData.id || body.telegram_id || null;
 
-    const firstName = String(body.firstName || '').trim();
-    const lastName  = String(body.lastName  || '').trim();
-    const phone     = String(body.phone     || '').trim();
+    const firstName = String(userData.first_name || body.firstName || '').trim();
+    const lastName  = String(userData.last_name || body.lastName || '').trim();
+    const phone     = String(userData.phone_number || body.phone || '').trim();
 
     if (!firstName || !lastName) {
       return res.status(400).json({ error: 'firstName and lastName are required' });
@@ -41,16 +43,14 @@ module.exports = async (req, res) => {
         customer_phone: phone,
         
         // Информация из Telegram
-        telegram_user_name: firstName + ' ' + lastName,
         telegram_id: telegram_id,
+        
+        // Все данные пользователя как один JSON-объект
+        max_user_data: JSON.stringify(body.telegram.user),
         
         // Дополнительная информация
         source: 'telegram-webapp-registration',
         ts: new Date().toISOString(),
-        
-        // Поля, которые могут использоваться в сценариях WatBot
-        first_name: firstName,
-        last_name: lastName,
         
         // Поля для возможного расширения функционала
         registration_date: new Date().toISOString().split('T')[0],
