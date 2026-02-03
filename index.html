@@ -230,7 +230,8 @@
     // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
     let userData = null;
     let isMaxApp = false;
-
+    let maxApi = null;
+    let isWebApp = false;
     // ===== DOM =====
     const form = document.getElementById('form');
     const registrationForm = document.getElementById('registrationForm');
@@ -263,42 +264,58 @@
 
     // ===== MAX BRIDGE ИНИЦИАЛИЗАЦИЯ =====
     async function initMaxBridge() {
-      console.log('[INIT] Начало инициализации MAX Bridge');
+      console.log('[INIT] MAX init start');
 
-      if (!window.MaxBridge) {
-        console.warn('[INIT] MaxBridge недоступен - работаем в режиме браузера');
+      maxApi = window.WebApp || window.MaxBridge || null;
+      isWebApp = !!window.WebApp;
+
+      if (!maxApi) {
+        console.warn('[INIT] SDK not available - browser mode');
         isMaxApp = false;
         initBrowserMode();
         return;
       }
 
       try {
-        await MaxBridge.ready();
-        console.log('[INIT] MaxBridge готов!');
+        if (isWebApp) {
+          if (maxApi.ready) maxApi.ready();
+        } else {
+          await maxApi.ready();
+          await maxApi.send('WebApp.ready');
+        }
 
         isMaxApp = true;
 
-        await MaxBridge.send('WebApp.ready');
-        console.log('[INIT] WebApp.ready отправлен');
-
         await getUserData();
 
-        console.log('[INIT] Инициализация завершена');
+        console.log('[INIT] MAX init done');
 
       } catch (error) {
-        console.error('[INIT] Ошибка инициализации:', error);
+        console.error('[INIT] MAX init error:', error);
         isMaxApp = false;
         initBrowserMode();
       }
     }
 
+
     // ===== ПОЛУЧЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ =====
     async function getUserData() {
       try {
-        userData = await MaxBridge.send('getUserData');
-        console.log('[USER] Данные пользователя получены:', userData);
+        if (isWebApp) {
+          if (maxApi.getUserData) {
+            userData = await maxApi.getUserData();
+          } else if (maxApi.initDataUnsafe && maxApi.initDataUnsafe.user) {
+            userData = maxApi.initDataUnsafe.user;
+          } else {
+            userData = null;
+          }
+        } else {
+          userData = await maxApi.send('getUserData');
+        }
 
-        // Автозаполнение имени если поля пустые
+        if (userData && userData.user) userData = userData.user;
+        console.log('[USER] userData:', userData);
+
         if (userData) {
           if (userData.first_name && !firstNameInput.value) {
             firstNameInput.value = userData.first_name;
@@ -309,30 +326,38 @@
         }
 
       } catch (error) {
-        console.error('[USER] Ошибка получения данных пользователя:', error);
+        console.error('[USER] getUserData error:', error);
       }
     }
+
 
     // ===== РЕЖИМ БРАУЗЕРА (FALLBACK) =====
     function initBrowserMode() {
       console.log('[BROWSER] Инициализация режима браузера');
 
+      const devId = window.DEV_USER_ID || null;
       userData = {
-        user_id: window.DEV_USER_ID || null,
+        user_id: devId,
+        id: devId,
         name: 'Тестовый пользователь'
       };
     }
 
     // ===== ЗАКРЫТИЕ ПРИЛОЖЕНИЯ =====
     async function closeApp() {
-      if (isMaxApp) {
-        try {
-          await MaxBridge.send('WebApp.close');
-        } catch (error) {
-          console.error('[CLOSE] Ошибка закрытия:', error);
+      if (!isMaxApp) return;
+
+      try {
+        if (isWebApp && maxApi.close) {
+          maxApi.close();
+        } else {
+          await maxApi.send('WebApp.close');
         }
+      } catch (error) {
+        console.error('[CLOSE] close error:', error);
       }
     }
+
 
     // ===== Helpers =====
     function showFatal(message) {
@@ -427,12 +452,12 @@
       }
 
       // Формируем user_id из MAX данных
-      const max_user_id = userData && userData.user_id ? userData.user_id : null;
-
+      const max_user_id = userData?.user_id ?? userData?.id ?? userData?.userId ?? null;
       const payload = {
         firstName: (firstNameInput.value || '').trim(),
         lastName: (lastNameInput.value || '').trim(),
         phone: phoneE164,
+        max_user_id: max_user_id,
         telegram_id: max_user_id, // Используем user_id из MAX (совместимость с API)
         telegram: {
           initData: '',

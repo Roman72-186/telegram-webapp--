@@ -18,8 +18,15 @@ module.exports = async (req, res) => {
     }
 
     // Получаем userData из body.telegram.user
-    const userData = body.telegram?.user || {};
-    const telegram_id = userData.id || body.telegram_id || null;
+    const userData = body.telegram?.user || body.max?.user || body.user || {};
+    const max_user_id =
+      body.max_user_id ??
+      userData.user_id ??
+      userData.id ??
+      body.telegram_id ??
+      null;
+
+    const telegram_id = max_user_id ?? body.telegram_id ?? null;
 
     const firstName = String(userData.first_name || body.firstName || '').trim();
     const lastName  = String(userData.last_name || body.lastName || '').trim();
@@ -35,18 +42,19 @@ module.exports = async (req, res) => {
     // Подготовка данных в формате, требуемом WatBot
     // Используем telegram_id как основной параметр поиска, если доступен
     const payloadToWatBot = {
-      contact_by: telegram_id ? 'telegram_id' : 'phone',
-      search: telegram_id ? String(telegram_id) : phone,
+      contact_by: max_user_id ? 'telegram_id' : 'phone',
+      search: max_user_id ? String(max_user_id) : phone,
       variables: {
         // Основная информация о пользователе
         customer_name: `${firstName} ${lastName}`,
         customer_phone: phone,
         
         // Информация из Telegram
-        telegram_id: telegram_id,
+        telegram_id: max_user_id,
+        max_user_id: max_user_id,
         
         // Все данные пользователя как один JSON-объект
-        max_user_data: JSON.stringify(body.telegram.user),
+        max_user_data: JSON.stringify(userData || null),
         
         // Дополнительная информация
         source: 'telegram-webapp-registration',
